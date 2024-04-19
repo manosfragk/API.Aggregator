@@ -12,7 +12,7 @@ namespace API_Aggregator.Services
     public class IpGeolocationService : IIpGeolocationService
     {
         private readonly HttpClient _httpClient;
-        private const string _ApiKey = "ddbc3af8c2074cc2b887ca9dd1732cdb";
+        private const string _ApiKey = "API KEY";
 
         /// <summary>
         /// Constructor that injects the HttpClient instance.

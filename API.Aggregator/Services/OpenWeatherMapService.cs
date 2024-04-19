@@ -11,7 +11,7 @@ namespace API_Aggregator.Services
     public class OpenWeatherMapService : IOpenWeatherMapService
     {
         private readonly HttpClient _httpClient;
-        private const string _ApiKey = "e88bd362905cd8073ec9723c49d1994d";
+        private const string _ApiKey = "API KEY";
 
         /// <summary>
         /// Constructor that injects the HttpClient instance.

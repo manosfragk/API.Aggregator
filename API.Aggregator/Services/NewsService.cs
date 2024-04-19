@@ -11,7 +11,7 @@ namespace API.Aggregator.Services
     public class NewsService : INewsService
     {
         private readonly HttpClient _httpClient;
-        private const string _ApiKey = "a69e751f20a4435fa8847c76fdf9252b";
+        private const string _ApiKey = "API KEY";
 
         /// <summary>
         /// Constructor that injects the HttpClient instance.

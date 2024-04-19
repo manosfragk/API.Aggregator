@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aggregated Data App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1 class="material-title">Data Aggregation API</h1>
+    <div class="input-container">
+        <input type="text" id="cityInput" placeholder="Enter City Name">
+        <button id="fetchDataButton">Fetch Data</button>
+    </div>
+
+    <div class="weather-info" id="weatherInfo">
+        <h2>Weather</h2>
+        <p>Temperature: </p>
+        <p>City: </p>
+        <p>Description: </p>
+    </div>
+
+    <div class="ip-info" id="ipInfo">
+        <h2>IP Information</h2>
+        <p>IP: </p>
+        <p>City: </p>
+    </div>
+
+    <div class="news-list-container">
+        <h2>News</h2>
+        <div id="newsList"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

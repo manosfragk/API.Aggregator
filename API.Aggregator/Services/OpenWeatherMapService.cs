@@ -52,7 +52,7 @@ namespace API_Aggregator.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error fetching IP geolocation data: {Message}", ex.Message);
+                    _logger.LogError(ex, "Error fetching OpenWeatherMap data: {Message}", ex.Message);
                     weatherData = null; // Set weatherData to null on error
                 }
 

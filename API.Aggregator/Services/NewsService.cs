@@ -75,7 +75,7 @@ namespace API.Aggregator.Services
         {
             if (cachedNewsArticles == null)
                 return false;
-            return cachedNewsArticles.All(article => DateTime.UtcNow - article?.LastUpdated < TimeSpan.FromMinutes(15)); // Adjust expiration as needed
+            return true/*cachedNewsArticles.All(article => DateTime.UtcNow - article?.LastUpdated < TimeSpan.FromMinutes(15))*/; // Adjust expiration as needed
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace API.Aggregator.Services
         private string GetCacheKey(string city)
         {
             // Use a combination of "IpGeolocation" prefix, current date, and city address for uniqueness.
-            return $"IpGeolocation_{DateTime.UtcNow.ToString("yyyyMMdd")}_{city}";
+            return $"NewsService{DateTime.UtcNow.ToString("yyyyMMdd")}_{city}";
         }
 
 

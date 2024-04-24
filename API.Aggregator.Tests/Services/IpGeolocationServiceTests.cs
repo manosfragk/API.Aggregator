@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using API_Aggregator.Services;
 using Moq;
 using Moq.Protected;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace API.Aggregator.Tests.Services
 {
@@ -17,6 +19,16 @@ namespace API.Aggregator.Tests.Services
     /// </summary>
     public class IpGeolocationServiceTests
     {
+
+        private readonly Mock<IMemoryCache> _mockCache;
+        private readonly Mock<ILogger<IpGeolocationService>> _mockLogger;
+
+        public IpGeolocationServiceTests()
+        {
+            _mockCache = new Mock<IMemoryCache>();
+            _mockLogger = new Mock<ILogger<IpGeolocationService>>();
+        }
+
         /// <summary>
         /// Tests that GetIpGeolocationAsync successfully retrieves and parses an IP geolocation response.
         /// This test mocks the underlying HttpClient behavior to simulate a successful response.
@@ -35,7 +47,7 @@ namespace API.Aggregator.Tests.Services
                 .ReturnsAsync(mockResponse);
 
             var httpClient = new HttpClient(httpMessageHandlerMock.Object);
-            var service = new IpGeolocationService(httpClient);
+            var service = new IpGeolocationService(httpClient, _mockCache.Object, _mockLogger.Object);
 
             // Act
             var ipGeolocationInfo = await service.GetIpGeolocationAsync();
@@ -62,7 +74,7 @@ namespace API.Aggregator.Tests.Services
                 .ReturnsAsync(mockResponse);
 
             var httpClient = new HttpClient(httpMessageHandlerMock.Object);
-            var service = new IpGeolocationService(httpClient);
+            var service = new IpGeolocationService(httpClient, _mockCache.Object, _mockLogger.Object);
 
             // Act & Assert (expect exception)
             await Assert.ThrowsAsync<Exception>(async () => await service.GetIpGeolocationAsync());

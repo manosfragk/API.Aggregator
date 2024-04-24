@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Moq.Protected;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace API.Aggregator.Tests.Services
 {
@@ -17,6 +19,16 @@ namespace API.Aggregator.Tests.Services
     /// </summary>
     public class OpenWeatherMapServiceTests
     {
+
+        private readonly Mock<IMemoryCache> _mockCache;
+        private readonly Mock<ILogger<OpenWeatherMapService>> _mockLogger;
+
+        public OpenWeatherMapServiceTests()
+        {
+            _mockCache = new Mock<IMemoryCache>();
+            _mockLogger = new Mock<ILogger<OpenWeatherMapService>>();
+        }
+
         /// <summary>
         /// Tests that GetWeatherAsync successfully retrieves and parses weather information from a successful response.
         /// This test mocks the underlying HttpClient behavior to simulate a successful response.
@@ -35,7 +47,7 @@ namespace API.Aggregator.Tests.Services
                 .ReturnsAsync(mockResponse);
 
             var httpClient = new HttpClient(httpMessageHandlerMock.Object);
-            var weatherService = new OpenWeatherMapService(httpClient);
+            var weatherService = new OpenWeatherMapService(httpClient, _mockCache.Object, _mockLogger.Object);
 
             // Act
             var weatherInfo = await weatherService.GetWeatherAsync("Athens");
@@ -60,7 +72,7 @@ namespace API.Aggregator.Tests.Services
                 .ReturnsAsync(mockResponse);
 
             var httpClient = new HttpClient(httpMessageHandlerMock.Object);
-            var weatherService = new OpenWeatherMapService(httpClient);
+            var weatherService = new OpenWeatherMapService(httpClient, _mockCache.Object, _mockLogger.Object);
 
             // Act & Assert (expect exception)
             await Assert.ThrowsAsync<HttpRequestException>(async () => await weatherService.GetWeatherAsync("Athens"));

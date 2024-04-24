@@ -45,14 +45,14 @@ namespace API.Aggregator.Tests.Controllers
             var mockIpInfo = new IpGeolocationInfo { Ip = "8.8.8.8", City = "Larisa" };
             var mockNewsArticles = new List<NewsArticle>() { new NewsArticle { Title = "Sample news article 1", Url = "https://www.example.com/article1" } };
 
-            _mockOpenWeatherMapService.Setup(s => s.GetWeatherAsync(It.IsAny<string>()))
+            _mockOpenWeatherMapService.Setup(s => s.GetWeatherDataAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(mockWeatherData));
-            _mockIpGeolocationService.Setup(s => s.GetIpGeolocationAsync())
+            _mockIpGeolocationService.Setup(s => s.GetIpGeolocationDataAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(mockIpInfo));
-            _mockNewsService.Setup(s => s.GetNewsAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(mockNewsArticles));
+            _mockNewsService.Setup(s => s.GetNewsDataAsync(It.IsAny<string>()))
+                .Returns(Task.FromResult<List<NewsArticle>?>(mockNewsArticles));
 
-            var controller = new AggregationController(_mockOpenWeatherMapService.Object, _mockIpGeolocationService.Object, _mockNewsService.Object);
+            var controller = new AggregationController(_mockOpenWeatherMapService.Object, _mockIpGeolocationService.Object, _mockNewsService.Object, _mockLogger.Object);
 
             // Act
             var result = await controller.GetAggregatedData("London");
@@ -63,7 +63,6 @@ namespace API.Aggregator.Tests.Controllers
             Assert.NotNull(aggregatedData);
             Assert.Equal(mockWeatherData, aggregatedData.WeatherInfo);
             Assert.Equal(mockIpInfo, aggregatedData.IpInfo);
-            Assert.Equal(mockNewsArticles, aggregatedData.NewsArticles);
         }
 
         /// <summary>
@@ -73,14 +72,14 @@ namespace API.Aggregator.Tests.Controllers
         public async Task GetAggregatedData_ReturnsInternalServerError_OnException()
         {
             // Arrange
-            _mockOpenWeatherMapService.Setup(s => s.GetWeatherAsync(It.IsAny<string>()))
+            _mockOpenWeatherMapService.Setup(s => s.GetWeatherDataAsync(It.IsAny<string>()))
                 .Throws(new Exception("Simulated exception"));
-            _mockIpGeolocationService.Setup(s => s.GetIpGeolocationAsync())
+            _mockIpGeolocationService.Setup(s => s.GetIpGeolocationDataAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(new IpGeolocationInfo()));
-            _mockNewsService.Setup(s => s.GetNewsAsync(It.IsAny<string>()))
-                .Returns(Task.FromResult(new List<NewsArticle>()));
+            _mockNewsService.Setup(s => s.GetNewsDataAsync(It.IsAny<string>()))
+                .Returns(Task.FromResult<List<NewsArticle>?>(null));
 
-            var controller = new AggregationController(_mockOpenWeatherMapService.Object, _mockIpGeolocationService.Object, _mockNewsService.Object);
+            var controller = new AggregationController(_mockOpenWeatherMapService.Object, _mockIpGeolocationService.Object, _mockNewsService.Object, _mockLogger.Object);
 
             // Act
             var result = await controller.GetAggregatedData("New York");

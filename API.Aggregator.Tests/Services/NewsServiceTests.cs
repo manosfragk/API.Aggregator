@@ -9,6 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using Moq.Protected;
+using API_Aggregator.Services;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 
 namespace API.Aggregator.Tests.Services
 {
@@ -17,6 +20,16 @@ namespace API.Aggregator.Tests.Services
     /// </summary>
     public class NewsServiceTests
     {
+
+        private readonly Mock<IMemoryCache> _mockCache;
+        private readonly Mock<ILogger<NewsService>> _mockLogger;
+
+        public NewsServiceTests()
+        {
+            _mockCache = new Mock<IMemoryCache>();
+            _mockLogger = new Mock<ILogger<NewsService>>();
+        }
+
         /// <summary>
         /// Tests that GetNewsAsync successfully retrieves and parses news articles from a successful response.
         /// This test mocks the underlying HttpClient behavior to simulate a successful response.
@@ -35,7 +48,7 @@ namespace API.Aggregator.Tests.Services
                 .ReturnsAsync(mockResponse);
 
             var httpClient = new HttpClient(httpMessageHandlerMock.Object);
-            var newsService = new NewsService(httpClient);
+            var newsService = new NewsService(httpClient, _mockCache.Object, _mockLogger.Object);
 
             // Act
             var newsArticles = await newsService.GetNewsAsync("Larisa");
@@ -61,7 +74,7 @@ namespace API.Aggregator.Tests.Services
                 .ReturnsAsync(mockResponse);
 
             var httpClient = new HttpClient(httpMessageHandlerMock.Object);
-            var newsService = new NewsService(httpClient);
+            var newsService = new NewsService(httpClient, _mockCache.Object, _mockLogger.Object);
 
             // Act & Assert (expect exception)
             await Assert.ThrowsAsync<HttpRequestException>(async () => await newsService.GetNewsAsync("Larisa"));

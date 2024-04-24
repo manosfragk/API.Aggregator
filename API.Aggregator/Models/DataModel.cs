@@ -17,6 +17,11 @@
         /// Gets or sets the URL of the news article.
         /// </summary>
         public string Url { get; set; } = "";
+
+        /// <summary>
+        /// Gets or sets the LastUpdated of the news article.
+        /// </summary>
+        public DateTime LastUpdated {  get; set; }
     }
 
     /// <summary>

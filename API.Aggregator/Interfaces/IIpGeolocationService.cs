@@ -10,6 +10,6 @@ namespace API.Aggregator.Interfaces
         /// <summary>
         /// Asynchronously retrieves geolocation information for the user's IP address.
         /// </summary>
-        Task<IpGeolocationInfo> GetIpGeolocationAsync();
+        Task<IpGeolocationInfo> GetIpGeolocationDataAsync(string city);
     }
 }

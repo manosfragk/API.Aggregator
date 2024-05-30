@@ -13,7 +13,7 @@ namespace API_Aggregator.Services
     public class OpenWeatherMapService : IOpenWeatherMapService
     {
         private readonly HttpClient _httpClient;
-        private const string _ApiKey = "API KEY";
+        private readonly string _ApiKey;
         private readonly IMemoryCache _cache;
         private readonly ILogger<OpenWeatherMapService> _logger;
 
@@ -28,6 +28,7 @@ namespace API_Aggregator.Services
             _httpClient = httpClient;
             _cache = cache;
             _logger = logger;
+            _ApiKey = Environment.GetEnvironmentVariable("API_KEY");
         }
 
         /// <summary>
@@ -37,12 +38,12 @@ namespace API_Aggregator.Services
         /// </summary>
         /// <param name="city">The city name for which to retrieve weather data.</param>
         /// <returns>An WeatherInfo object containing city, weather description, and temperature (in Celsius) or an empty object on error.</returns>
-        public async Task<WeatherInfo> GetWeatherDataAsync(string city)
+        public async Task<IAggregatorService> GetWeatherDataAsync(string city)
         {
             // Check cache first
             // Generate a dynamic cache key based on date and city
             var cacheKey = GetCacheKey(city);
-            WeatherInfo? weatherData;
+            WeatherInfo weatherData;
             if (!_cache.TryGetValue(cacheKey, out weatherData))
             {
                 // Fetch data from external API if not cached
@@ -95,7 +96,7 @@ namespace API_Aggregator.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    OpenWeatherMapResponse? weatherMapResponse;
+                    OpenWeatherMapResponse weatherMapResponse;
                     try
                     {
                         weatherMapResponse = JsonConvert.DeserializeObject<OpenWeatherMapResponse>(content);

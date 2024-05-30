@@ -14,7 +14,7 @@ namespace API_Aggregator.Services
     public class IpGeolocationService : IIpGeolocationService
     {
         private readonly HttpClient _httpClient;
-        private const string _ApiKey = "API KEY";
+        private readonly string _ApiKey;
         private readonly IMemoryCache _cache;
         private readonly ILogger<IpGeolocationService> _logger;
 
@@ -29,6 +29,7 @@ namespace API_Aggregator.Services
             _httpClient = httpClient;
             _cache = cache;
             _logger = logger;
+            _ApiKey = Environment.GetEnvironmentVariable("API_KEY");
         }
 
         /// <summary>
@@ -38,12 +39,16 @@ namespace API_Aggregator.Services
         /// </summary>
         /// <param name="city">The city name for which to retrieve weather data.</param>
         /// <returns>An IpGeolocationInfo object containing IP address and city (if available) or an empty object on error.</returns>
-        public async Task<IpGeolocationInfo> GetIpGeolocationDataAsync(string city)
+        public async Task<IAggregatorService> GetIpGeolocationDataAsync(string city)
         {
+
+            if (string.IsNullOrEmpty(_ApiKey))
+                return new IpGeolocationInfo() as IAggregatorService;
+
             // Check cache first
             // Generate a dynamic cache key based on date and city
             var cacheKey = GetCacheKey(city); 
-            IpGeolocationInfo? ipData;
+            IpGeolocationInfo ipData;
             if (!_cache.TryGetValue(cacheKey, out ipData))
             {
                 // Fetch data from external API if not cached
@@ -67,7 +72,7 @@ namespace API_Aggregator.Services
                 }
             }
 
-            return ipData ?? new IpGeolocationInfo();
+            return ipData as IAggregatorService;
         }
 
         /// <summary>
@@ -103,7 +108,7 @@ namespace API_Aggregator.Services
                 {
                     var content = await response.Content.ReadAsStringAsync();
 
-                    IpGeolocationApiResponse? ipGeolocationApiResponse;
+                    IpGeolocationApiResponse ipGeolocationApiResponse;
                     try
                     {
                         ipGeolocationApiResponse = JsonConvert.DeserializeObject<IpGeolocationApiResponse>(content);

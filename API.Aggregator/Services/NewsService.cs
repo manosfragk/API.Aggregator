@@ -13,7 +13,7 @@ namespace API.Aggregator.Services
     public class NewsService : INewsService
     {
         private readonly HttpClient _httpClient;
-        private const string _ApiKey = "API KEY";
+        private readonly string _ApiKey;
         private readonly IMemoryCache _cache;
         private readonly ILogger<NewsService> _logger;
 
@@ -28,6 +28,7 @@ namespace API.Aggregator.Services
             _httpClient = httpClient;
             _cache = cache;
             _logger = logger;
+            _ApiKey = Environment.GetEnvironmentVariable("API_KEY");
         }
 
         /// <summary>
@@ -37,18 +38,48 @@ namespace API.Aggregator.Services
         /// </summary>
         /// <param name="city">The city name for which to retrieve news articles.</param>
         /// <returns>A task that resolves to a list of NewsArticle objects containing news data for the specified city, or an empty list on error.</returns>
-        public async Task<List<NewsArticle>?> GetNewsDataAsync(string city)
+        //public async Task<List<IAggregatorService>> GetNewsDataAsync(string city)
+        //{
+        //    // Check cache first
+        //    // Generate a dynamic cache key based on date and city
+        //    var cacheKey = GetCacheKey(city);
+        //    List<NewsArticle> cachedNewsArticles = new List<NewsArticle>();
+        //    if (_cache.TryGetValue(cacheKey, out cachedNewsArticles))
+        //    {
+        //        // Check cache expiration (optional)
+        //        if (IsCacheValid(cachedNewsArticles)) // Implement IsCacheValid logic
+        //        {
+        //            return cachedNewsArticles; // Return cached data if valid
+        //        }
+        //    }
+
+        //    // Fetch data from external API if not cached or expired
+        //    try
+        //    {
+        //        var newsArticles = await GetNewsAsync(city);
+        //        // Consider filtering or transforming data before caching (optional)
+        //        _cache.Set(cacheKey, newsArticles, GetCacheOptions()); // Set cache with appropriate options
+        //        return newsArticles; // Return fetched data directly
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error fetching news data for city '{City}': {Message}", city, ex.Message);
+        //        return new List<NewsArticle>(); // Return empty list on error
+        //    }
+        //}
+
+        public async Task<IAggregatorService> GetNewsDataAsync(string city)
         {
             // Check cache first
             // Generate a dynamic cache key based on date and city
             var cacheKey = GetCacheKey(city);
-            List<NewsArticle>? cachedNewsArticles = new List<NewsArticle>();
+            List<NewsArticle> cachedNewsArticles = new List<NewsArticle>();
             if (_cache.TryGetValue(cacheKey, out cachedNewsArticles))
             {
                 // Check cache expiration (optional)
                 if (IsCacheValid(cachedNewsArticles)) // Implement IsCacheValid logic
                 {
-                    return cachedNewsArticles; // Return cached data if valid
+                    return cachedNewsArticles as IAggregatorService; // Return cached data if valid (already implements IAggregatedDataPiece)
                 }
             }
 
@@ -58,20 +89,23 @@ namespace API.Aggregator.Services
                 var newsArticles = await GetNewsAsync(city);
                 // Consider filtering or transforming data before caching (optional)
                 _cache.Set(cacheKey, newsArticles, GetCacheOptions()); // Set cache with appropriate options
-                return newsArticles; // Return fetched data directly
+
+                // Wrap the retrieved data in a List to implement IAggregatedDataPiece
+                return newsArticles as IAggregatorService;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching news data for city '{City}': {Message}", city, ex.Message);
-                return new List<NewsArticle>(); // Return empty list on error
+                return new List<NewsArticle>() as IAggregatorService; // Return an empty List implementing IAggregatedDataPiece on error
             }
         }
+
 
         /// <summary>
         /// </summary>
         /// <param name="cachedNewsArticles">The cached news articles.</param>
         /// <returns>True if the cached data is valid, False otherwise.</returns>
-        private bool IsCacheValid(List<NewsArticle>? cachedNewsArticles)
+        private bool IsCacheValid(List<NewsArticle> cachedNewsArticles)
         {
             if (cachedNewsArticles == null)
                 return false;
@@ -106,7 +140,7 @@ namespace API.Aggregator.Services
         /// </summary>
         /// <param name="city">The city name for which to retrieve news articles.</param>
         /// <returns>A list of NewsArticle objects containing titles and URLs, or an empty list on error.</returns>
-        public async Task<List<NewsArticle>?> GetNewsAsync(string city)
+        public async Task<List<NewsArticle>> GetNewsAsync(string city)
         {
 
             var parameters = new Dictionary<string, string>()
@@ -124,7 +158,7 @@ namespace API.Aggregator.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
-                    NewsArticleResponse? newsResponse;
+                    NewsArticleResponse newsResponse;
                     try
                     {
                         newsResponse = JsonConvert.DeserializeObject<NewsArticleResponse>(content);

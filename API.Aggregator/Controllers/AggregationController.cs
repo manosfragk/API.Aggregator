@@ -3,6 +3,7 @@ using API.Aggregator.Interfaces;
 using API.Aggregator.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace API.Aggregator.Controllers
 {
@@ -46,16 +47,22 @@ namespace API.Aggregator.Controllers
         {
             try
             {
-                var newsTask = _newsService.GetNewsDataAsync(city).ConfigureAwait(false);// Avoid potential deadlocks in UI applications.
-                                                                                     // This ensures the continuations after the await calls do not capture the synchronization context
-                                                                                     // of the current thread, allowing tasks to complete on any available thread.
-                
-                var weatherTask = _openWeatherMapService.GetWeatherDataAsync(city).ConfigureAwait(false);
-                var ipInfoTask = _ipGeolocationService.GetIpGeolocationDataAsync(city).ConfigureAwait(false);
+                // Create a list of tasks to hold the asynchronous operations
 
-                var news = await newsTask;
-                var weatherData = await weatherTask;
-                var ipData = await ipInfoTask;
+                List<Task<IAggregatorService>> tasks =
+                [
+                    _newsService.GetNewsDataAsync(city),
+                    _openWeatherMapService.GetWeatherDataAsync(city),
+                    _ipGeolocationService.GetIpGeolocationDataAsync(city),
+                ];
+
+                // Wait for all tasks to complete concurrently
+                var results = await Task.WhenAll(tasks);
+
+
+                var news = results[0] as List<NewsArticle>;
+                var weatherData = results[1] as WeatherInfo;
+                var ipData = results[2] as IpGeolocationInfo;
 
                 var aggregatedData = new AggregatedData
                 {

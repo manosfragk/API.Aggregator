@@ -12,6 +12,6 @@ namespace API.Aggregator.Interfaces
         /// </summary>
         /// <param name="city">The city name for which to retrieve weather data.</param>
         /// <returns>A Task that resolves to a WeatherInfo object containing city, weather description, and temperature (in Celsius), or an empty object on error.</returns>
-        Task<WeatherInfo> GetWeatherDataAsync(string city);
+        Task<IAggregatorService> GetWeatherDataAsync(string city);
     }
 }

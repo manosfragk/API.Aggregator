@@ -1,4 +1,6 @@
-﻿namespace API.Aggregator.Models
+﻿using API.Aggregator.Interfaces;
+
+namespace API.Aggregator.Models
 {
 
     #region News
@@ -90,7 +92,7 @@
     /// <summary>
     /// Represents processed weather information with city, temperature (in Celsius), and description.
     /// </summary>
-    public class WeatherInfo
+    public class WeatherInfo : IAggregatorService
     {
         /// <summary>
         /// Gets or sets the city name.
